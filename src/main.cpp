@@ -182,7 +182,7 @@ void setup()
     if (!shouldFullyUpdatedScreen)
     {
         Serial.println("rebuild previous screen");
-        if (!display.drawImage(archivedImageUrl, 0, 0, false, true))
+        if (!display.drawImage(archivedImageUrl, 0, 0, false, false))
         {
             shouldFullyUpdatedScreen = true;
         }
@@ -194,7 +194,7 @@ void setup()
     display.clearDisplay();
 
     Serial.println("load new screen");
-    if (!display.drawImage(imageUrl, 0, 0, false, true))
+    if (!display.drawImage(imageUrl, 0, 0, false, false))
     {
         display.println("Image open error");
         display.display();
@@ -211,9 +211,6 @@ void setup()
         display.display();
     }
 
-    Serial.print("Time to sleep: ");
-    // int timeToSleep = 60;
-    // Serial.println(timeToSleep);
     sendToDeepSleep(timeToSleep * 60);
 }
 
