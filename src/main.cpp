@@ -1,10 +1,11 @@
+
 #include "HTTPClient.h"
 #include "Inkplate.h"
 #include "WiFi.h"
 #include "config.h"
 #include "ArduinoJson.h"
 
-#define ENABLE_RTC // fime
+#define ENABLE_RTC // fixme
 
 uint64_t MS_TO_S_FACTOR = 1000000;
 
@@ -72,49 +73,6 @@ void connectWifi()
     Serial.println("done.");
 }
 
-void drawImage()
-{
-    // Draw the second image from web, this time using a HTTPClient to fetch the response manually.
-    // Full color 24 bit images are large and take a long time to load, will take around 20 secs.
-    HTTPClient http;
-    // Set parameters to speed up the download process.
-    http.getStream().setNoDelay(true);
-    http.getStream().setTimeout(1);
-
-    // Photo taken by: Roberto Fernandez
-    http.begin("https://varipass.org/neowise.bmp");
-
-    // Check response code.
-    int httpCode = http.GET();
-    if (httpCode == 200)
-    {
-        // Get the response length and make sure it is not 0.
-        int32_t len = http.getSize();
-        if (len > 0)
-        {
-            if (!display.drawBitmapFromWeb(http.getStreamPtr(), 0, 0, len))
-            {
-                // If is something failed (wrong filename or wrong bitmap format), write error message on the screen.
-                // REMEMBER! You can only use Windows Bitmap file with color depth of 1, 4, 8 or 24 bits with no
-                // compression!
-                display.println("Image open error");
-                display.display();
-            }
-            display.display();
-        }
-        else
-        {
-            display.println("Invalid response length");
-            display.display();
-        }
-    }
-    else
-    {
-        display.println("HTTP error");
-        display.display();
-    }
-}
-
 void setup()
 {
     // Serial.begin(9600); fixme deep sleep does not work properly when this is activated...
@@ -133,7 +91,7 @@ void setup()
 
     // load config
     HTTPClient http;
-    http.begin(String(SERVER_URL) + "/dashboard/calendar");
+    http.begin(String(SERVER_URL) + "/dashboard/livingroom");
     int httpCode = http.GET();
     if (httpCode != 200)
     {
@@ -141,9 +99,9 @@ void setup()
         Serial.println("Response code is " + httpCode);
 
         display.clearDisplay();
-        display.setCursor(300, 290);
+        display.setCursor(450, 390);
         display.setTextSize(4);
-        display.print("FEHLER");
+        display.print("FEHLER :-(");
         display.display();
         sendToDeepSleep(30 * 60);
         return;
@@ -173,8 +131,8 @@ void setup()
     wakeup_reason = esp_sleep_get_wakeup_cause();
 
     // whether the screen should be fully updated (true) or partial update is enough (false)
-    boolean shouldFullyUpdatedScreen = (wakeup_reason != ESP_SLEEP_WAKEUP_TIMER && wakeup_reason != ESP_SLEEP_WAKEUP_EXT0) 
-        || (wakeupCounter % 6) == 0; // always if not woken up by timer
+     boolean shouldFullyUpdatedScreen = (wakeup_reason != ESP_SLEEP_WAKEUP_TIMER && wakeup_reason != ESP_SLEEP_WAKEUP_EXT0) 
+         || (wakeupCounter % 6) == 0; // always if not woken up by timer
 
     Serial.print("Should fully update: ");
     Serial.println(shouldFullyUpdatedScreen);
