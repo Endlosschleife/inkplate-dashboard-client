@@ -2,9 +2,9 @@
 #include "WiFi.h"
 #include "config.h"
 #include "Dashboard.h"
+#include "SdFat.h"
 
-Inkplate display(INKPLATE_1BIT);
-
+Inkplate display(INKPLATE_3BIT);
 
 void connectWifi()
 {
@@ -59,9 +59,29 @@ void setup()
 
     // todo check if WIFI is really needed here
     connectWifi();
-   
-   Dashboard dashboard = Dashboard(display, SERVER_URL);
-   dashboard.show();
+
+    Dashboard dashboard = Dashboard(display, SERVER_URL);
+    dashboard.show();
+
+    // display.clearDisplay();
+    // if (display.sdCardInit())
+    // {    
+    //     SdFile file;
+    //     if (file.open("image2.jpg", O_RDONLY))
+    //     {
+    //         display.println("SD Card OK! Reading image...");
+    //         display.partialUpdate();
+    //         delay(3000);
+    //         display.drawJpegFromSd(&file, 0, 0, false, true);
+    //     } else {
+
+    //         display.println("could not load image");
+    //     }
+    // } else {
+    //     display.println("Error could not initialize sd card");
+    // }
+    // display.display();
+
     
 }
 
