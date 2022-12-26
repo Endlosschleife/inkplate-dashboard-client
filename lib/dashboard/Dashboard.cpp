@@ -45,6 +45,8 @@ void Dashboard::loadConfig() {
     Serial.println(imageUrl);
     Serial.print("Archived Image Url: ");
     Serial.println(archivedImageUrl);    
+    Serial.print("Time to sleep: ");
+    Serial.println(this->timeToSleep);
 }
 
 void Dashboard::handleImage() {
@@ -64,13 +66,13 @@ void Dashboard::handleImage() {
     if (!shouldFullyUpdatedScreen)
     {
         Serial.println("rebuild previous screen");
-        if (!display.drawImage(archivedImageUrl, 0, 0, false, false))
+        if (display.drawImage(archivedImageUrl, 0, 0, false, false))
         {
-            shouldFullyUpdatedScreen = true;
+            display.preloadScreen();
         }
         else
         {
-            display.preloadScreen();
+            shouldFullyUpdatedScreen = true;
         }
     }
     display.clearDisplay();
@@ -96,8 +98,6 @@ void Dashboard::handleImage() {
 
 void Dashboard::sendToDeepSleep(int seconds) {
     Serial.println("Going to deep sleep for " + String(seconds) + " seconds now.");
-    // use RTC of inkplate for deep sleep
-    Serial.println(display.rtcGetEpoch());
     display.rtcSetAlarmEpoch(display.rtcGetEpoch() + seconds, RTC_ALARM_MATCH_DHHMMSS);
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0);
     esp_deep_sleep_start();

@@ -33,20 +33,19 @@ void connectWifi()
 
         if (WiFi.status() != WL_CONNECTED)
         {
-            Serial.println("Could still not connect to wifi.");
+            Serial.println("Could still not connect to wifi. Restart ESP...");
+            ESP.restart();
         }
         else
         {
             Serial.println("Connected to Wifi successfully.");
         }
     }
-
-    Serial.println("done.");
 }
 
 void setup()
 {
-    // Serial.begin(9600); fixme deep sleep does not work properly when this is activated...
+    Serial.begin(115200); // fixme deep sleep does not work properly when this is activated...
     display.begin();
 
     // enable RTC
