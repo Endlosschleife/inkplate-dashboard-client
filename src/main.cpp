@@ -40,6 +40,8 @@ void connectWifi()
         {
             Serial.println("Connected to Wifi successfully.");
         }
+    } else {
+        Serial.println("Connected to Wifi.");
     }
 }
 

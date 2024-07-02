@@ -3,17 +3,39 @@
 DynamicJsonDocument doc(ESP.getMaxAllocHeap());
 RTC_DATA_ATTR int wakeupCounter = 0;
 
-void Dashboard::show() {
+void Dashboard::show()
+{
     this->loadConfig();
     this->handleImage();
     this->sendToDeepSleep(this->timeToSleep * 60);
 }
 
-void Dashboard::loadConfig() {
+void Dashboard::loadConfig()
+{
     // load config
     HTTPClient http;
-    http.begin(this->serverUrl + "/dashboard/livingroom");
-    int httpCode = http.GET();
+    int httpCode;
+    int attempts = 0;
+    bool success = false;
+    while (!success && attempts < 3)
+    {
+        http.begin(this->serverUrl + "/dashboard/livingroom");
+        httpCode = http.GET();
+
+        if (httpCode == 200)
+        {
+            Serial.println("Loaded config successfully.");
+            success = true;
+        }
+        else
+        {
+            Serial.print("Could not load config. Attempt: ");
+            Serial.println(attempts);
+            attempts++;
+            delay(5000);
+        }
+    }
+    // still with error
     if (httpCode != 200)
     {
         Serial.println("Could not load data from API");
@@ -44,12 +66,13 @@ void Dashboard::loadConfig() {
     Serial.print("Image Url: ");
     Serial.println(imageUrl);
     Serial.print("Archived Image Url: ");
-    Serial.println(archivedImageUrl);    
+    Serial.println(archivedImageUrl);
     Serial.print("Time to sleep: ");
     Serial.println(this->timeToSleep);
 }
 
-void Dashboard::handleImage() {
+void Dashboard::handleImage()
+{
     wakeupCounter++;
 
     // handle behaviour using wake up reason
@@ -57,8 +80,7 @@ void Dashboard::handleImage() {
     wakeup_reason = esp_sleep_get_wakeup_cause();
 
     // whether the screen should be fully updated (true) or partial update is enough (false)
-     boolean shouldFullyUpdatedScreen = (wakeup_reason != ESP_SLEEP_WAKEUP_TIMER && wakeup_reason != ESP_SLEEP_WAKEUP_EXT0) 
-         || (wakeupCounter % 6) == 0; // always if not woken up by timer
+    boolean shouldFullyUpdatedScreen = (wakeup_reason != ESP_SLEEP_WAKEUP_TIMER && wakeup_reason != ESP_SLEEP_WAKEUP_EXT0) || (wakeupCounter % 6) == 0; // always if not woken up by timer
 
     Serial.print("Should fully update: ");
     Serial.println(shouldFullyUpdatedScreen);
@@ -96,7 +118,8 @@ void Dashboard::handleImage() {
     }
 }
 
-void Dashboard::sendToDeepSleep(int seconds) {
+void Dashboard::sendToDeepSleep(int seconds)
+{
     Serial.println("Going to deep sleep for " + String(seconds) + " seconds now.");
     display.rtcSetAlarmEpoch(display.rtcGetEpoch() + seconds, RTC_ALARM_MATCH_DHHMMSS);
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0);
